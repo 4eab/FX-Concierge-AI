@@ -127,7 +127,7 @@ async def fetch_boc_rate(target_currency: str, source_currency: str = "CNY") -> 
         source_currency: ISO 4217 code of the currency you hold (e.g. 'CNY', 'USD'). Default is 'CNY'.
 
     Returns:
-        dict with 'status', 'source_currency', 'target_currency', 'spot_sell', 'published_at'.
+        dict with 'status', 'source_currency', 'target_currency', 'spot_sell', 'published_at', and 'explanation'.
     """
     from app.sources import rate_manager
     try:
@@ -143,6 +143,7 @@ async def fetch_boc_rate(target_currency: str, source_currency: str = "CNY") -> 
             "published_at": quote.timestamp.isoformat(),
             "published_at_beijing": quote.timestamp.strftime("%Y-%m-%d %H:%M:%S (北京时间)"),
             "source": quote.source,
+            "explanation": f"1 {quote.currency_from} = {float(quote.rate):.4f} {quote.currency_to}",
         }
     except Exception as e:
         return {
