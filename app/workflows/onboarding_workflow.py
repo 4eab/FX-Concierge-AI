@@ -91,17 +91,13 @@ If information is incomplete, note what is missing in onboarding_summary, but st
 
 async def greet_new_user(ctx: Context, node_input):
     """Send welcome message and collect initial user input."""
-    # Clear any stale onboarding state to prevent session leakage
-    onboarding_keys = [
-        "initial_response",
-        "onboarding_result",
-        "saved_target_currencies",
-        "saved_source_currency",
-        "history_fetch_results",
-        "wants_briefing"
-    ]
-    for key in onboarding_keys:
-        ctx.state.pop(key, None)
+    # Reset any stale onboarding state to default empty values to prevent session leakage
+    ctx.state["initial_response"] = ""
+    ctx.state["onboarding_result"] = "{}"
+    ctx.state["saved_target_currencies"] = "[]"
+    ctx.state["saved_source_currency"] = "CNY"
+    ctx.state["history_fetch_results"] = "{}"
+    ctx.state["wants_briefing"] = "no"
 
     yield RequestInput(
         interrupt_id="onboarding_intro",
