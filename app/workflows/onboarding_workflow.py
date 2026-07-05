@@ -69,6 +69,9 @@ The input text contains the user's "Currency Selection" and "Purchase Needs". Yo
 4. **scoring_weights & alert_threshold**: These will be calculated automatically by Python. Use placeholders:
    - scoring_weights: {"historical_percentile": 0.3, "short_term_trend": 0.25, "mean_reversion": 0.2, "user_goal": 0.15, "volatility": 0.1}
    - alert_threshold: 70
+5. **Handle Midway Corrections**:
+   - If the user corrects themselves, changes their mind, or specifies a different currency setup in the "Purchase Needs" section compared to the initial "Currency Selection" (e.g. initially said "I hold CNY" but later said "actually buy EUR using USD"), **always prioritize the most recent information in "Purchase Needs" as the source of truth.**
+   - Do not output error messages or flags about inconsistency in the summary if the user has updated their choice; silently accept the latest update as the intended setting.
 
 **JSON Output Structure** (OnboardingResult schema):
 - source_currency: Base currency code
@@ -88,6 +91,18 @@ If information is incomplete, note what is missing in onboarding_summary, but st
 
 async def greet_new_user(ctx: Context, node_input):
     """Send welcome message and collect initial user input."""
+    # Clear any stale onboarding state to prevent session leakage
+    onboarding_keys = [
+        "initial_response",
+        "onboarding_result",
+        "saved_target_currencies",
+        "saved_source_currency",
+        "history_fetch_results",
+        "wants_briefing"
+    ]
+    for key in onboarding_keys:
+        ctx.state.pop(key, None)
+
     yield RequestInput(
         interrupt_id="onboarding_intro",
         message=(
