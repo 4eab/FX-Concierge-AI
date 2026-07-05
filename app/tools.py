@@ -117,22 +117,21 @@ async def fetch_ecb_daily(target_currencies: list) -> dict:
         }
 
 
-async def fetch_boc_rate(target_currency: str) -> dict:
-    """Fetch real-time spot sell rate from Bank of China (BOC).
+async def fetch_boc_rate(target_currency: str, source_currency: str = "CNY") -> dict:
+    """Fetch real-time spot rate for a target currency against a source base currency.
 
-    Scrapes the BOC FX rate page and returns the spot sell price (现汇卖出价),
-    which is the price CNY holders pay to buy 1 unit of the foreign currency.
-    Rate is in CNY per 1 foreign currency unit.
+    Scrapes rates and returns the price of target_currency in terms of source_currency.
 
     Args:
         target_currency: ISO 4217 code of the currency to buy (e.g. 'EUR', 'USD').
+        source_currency: ISO 4217 code of the currency you hold (e.g. 'CNY', 'USD'). Default is 'CNY'.
 
     Returns:
         dict with 'status', 'source_currency', 'target_currency', 'spot_sell', 'published_at'.
     """
     from app.sources import rate_manager
     try:
-        quote = await rate_manager.fetch_rate(target_currency, "CNY")
+        quote = await rate_manager.fetch_rate(target_currency, source_currency)
         return {
             "status": "success",
             "source_currency": quote.currency_from,

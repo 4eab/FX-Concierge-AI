@@ -242,10 +242,11 @@ async def fetch_realtime_rates(ctx: Context, node_input) -> Event:
     """Fetch current rates from BOC for all target currencies."""
     targets_json = ctx.state.get("target_currencies", "[]")
     targets = json.loads(targets_json)
+    source_currency = ctx.state.get("source_currency", "CNY")
 
     rates = {}
     for currency in targets:
-        result = await fetch_boc_rate(currency)
+        result = await fetch_boc_rate(currency, source_currency)
         if result.get("status") == "success":
             rates[currency] = result
             # Persist to DB
@@ -253,7 +254,7 @@ async def fetch_realtime_rates(ctx: Context, node_input) -> Event:
                 source_currency=result["source_currency"],
                 target_currency=result["target_currency"],
                 rate=result["spot_sell"],
-                rate_source="BOC",
+                rate_source=result.get("source", "BOC"),
                 rate_type="spot_sell",
             )
         else:
